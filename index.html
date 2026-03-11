@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alpha Translator 🔥</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --card: #111118;
+    --accent1: #ff3cac;
+    --accent2: #00f5d4;
+    --accent3: #ffda00;
+    --text: #f0f0ff;
+    --muted: #555568;
+    --border: #2a2a3a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Animated background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,60,172,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,60,172,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: gridMove 20s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  @keyframes gridMove {
+    0% { background-position: 0 0; }
+    100% { background-position: 40px 40px; }
+  }
+
+  /* Glowing orbs */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 0;
+    animation: orbFloat 8s ease-in-out infinite;
+  }
+  .orb1 { width: 400px; height: 400px; background: var(--accent1); top: -100px; right: -100px; animation-delay: 0s; }
+  .orb2 { width: 300px; height: 300px; background: var(--accent2); bottom: -50px; left: -50px; animation-delay: -4s; }
+
+  @keyframes orbFloat {
+    0%, 100% { transform: translate(0,0); }
+    50% { transform: translate(20px, -20px); }
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  /* Header */
+  header {
+    text-align: center;
+    margin-bottom: 50px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .logo-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    color: #000;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    padding: 4px 12px;
+    border-radius: 2px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(52px, 10vw, 96px);
+    line-height: 0.9;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, #fff 0%, var(--accent1) 50%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* Translator Box */
+  .translator {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    animation: fadeUp 0.7s ease 0.2s both;
+    box-shadow: 0 0 60px rgba(255,60,172,0.08);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .translator-top {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 0;
+  }
+
+  .pane {
+    padding: 24px;
+  }
+
+  .pane-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .pane-label .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  .pane-left .pane-label { color: var(--accent1); }
+  .pane-left .dot { background: var(--accent1); }
+  .pane-right .pane-label { color: var(--accent2); }
+  .pane-right .dot { background: var(--accent2); }
+
+  textarea {
+    width: 100%;
+    min-height: 160px;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 15px;
+    line-height: 1.7;
+    resize: none;
+    caret-color: var(--accent1);
+  }
+
+  textarea::placeholder { color: var(--muted); }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 8px;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    width: 60px;
+  }
+
+  .swap-btn {
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    flex-shrink: 0;
+  }
+
+  .swap-btn:hover {
+    transform: rotate(180deg) scale(1.1);
+    box-shadow: 0 0 20px rgba(255,60,172,0.5);
+  }
+
+  .output-text {
+    min-height: 160px;
+    font-family: 'Space Mono', monospace;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .output-placeholder {
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* Separator */
+  .translator-sep {
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Bottom bar */
+  .translator-bottom {
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .translate-btn {
+    background: linear-gradient(135deg, var(--accent1), #7b2ff7);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 28px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .translate-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.15));
+  }
+
+  .translate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(255,60,172,0.4);
+  }
+
+  .translate-btn:active { transform: scale(0.97); }
+
+  .translate-btn.loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  .char-count {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  .copy-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+  }
+
+  .copy-btn:hover {
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+
+  /* Examples */
+  .examples-section {
+    margin-top: 40px;
+    animation: fadeUp 0.7s ease 0.4s both;
+  }
+
+  .section-title {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .examples-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .example-chip {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 8px 16px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+  }
+
+  .example-chip:hover {
+    border-color: var(--accent1);
+    color: var(--text);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(255,60,172,0.2);
+  }
+
+  /* Dictionary section */
+  .dict-section {
+    margin-top: 50px;
+    animation: fadeUp 0.7s ease 0.5s both;
+  }
+
+  .dict-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .dict-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    transition: border-color 0.2s;
+  }
+
+  .dict-item:hover { border-color: var(--accent3); }
+
+  .dict-slang {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    color: var(--accent3);
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  .dict-meaning {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* Loading spinner */
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  /* Highlight translated words */
+  .highlight {
+    color: var(--accent2);
+    font-weight: 700;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--accent2);
+    color: #000;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    font-weight: 700;
+    transition: transform 0.3s ease;
+    z-index: 100;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .mode-toggle-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+    animation: fadeDown 0.6s ease 0.1s both;
+  }
+
+  .mode-toggle {
+    display: flex;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 4px;
+    gap: 4px;
+  }
+
+  .mode-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    padding: 10px 20px;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: all 0.25s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+
+  .mode-btn.active {
+    background: linear-gradient(135deg, var(--accent1), #7b2ff7);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255,60,172,0.35);
+  }
+
+  .mode-btn:not(.active):hover {
+    color: var(--text);
+    background: var(--border);
+  }
+
+  .mode-icon { font-size: 14px; }
+
+  @media (max-width: 480px) {
+    .mode-btn { font-size: 11px; padding: 9px 14px; }
+  }
+
+  /* Translator pane-right editable in slang mode */
+  #outputEditable {
+    min-height: 160px;
+    font-family: 'Space Mono', monospace;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+    outline: none;
+    caret-color: var(--accent2);
+  }
+  #outputEditable:empty::before {
+    content: attr(data-placeholder);
+    color: var(--muted);
+    font-style: italic;
+    pointer-events: none;
+  }
+
+  @media (max-width: 600px) {
+    .translator-top { grid-template-columns: 1fr; }
+    .divider { border: none; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); width: 100%; padding: 12px; }
+    .pane-right { border-top: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<div class="container">
+
+  <header>
+    <div class="logo-badge">v2.0 · Generace Alpha</div>
+    <h1>Alpha<br>Translator</h1>
+    <p class="subtitle">Alpha slang + český slang ↔ Normální čeština</p>
+  </header>
+
+  <!-- Mode Toggle -->
+  <div class="mode-toggle-wrap">
+    <div class="mode-toggle" id="modeToggle">
+      <button class="mode-btn active" id="btnToNormal" onclick="setMode('toNormal')">
+        <span class="mode-icon">🔤</span> Slang → Čeština
+      </button>
+      <button class="mode-btn" id="btnToSlang" onclick="setMode('toSlang')">
+        <span class="mode-icon">🔥</span> Čeština → Slang
+      </button>
+    </div>
+  </div>
+
+  <div class="translator">
+    <div class="translator-top">
+      <div class="pane pane-left">
+        <div class="pane-label"><span class="dot"></span> <span id="labelLeft">Alpha / český slang</span></div>
+        <textarea id="input" placeholder="Napiš text v alpha slangu... např. 'ten outfit je bussin no cap fr fr'" maxlength="1000"></textarea>
+      </div>
+      <div class="divider">
+        <button class="swap-btn" onclick="swapTexts()" title="Prohodit">⇄</button>
+      </div>
+      <div class="pane pane-right">
+        <div class="pane-label"><span class="dot"></span> <span id="labelRight">Normální čeština</span></div>
+        <div class="output-text" id="output">
+          <span class="output-placeholder">Překlad se zobrazí zde...</span>
+        </div>
+      </div>
+    </div>
+    <div class="translator-sep"></div>
+    <div class="translator-bottom">
+      <span class="char-count" id="charCount">0 / 1000 znaků</span>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button class="copy-btn" onclick="copyOutput()">Kopírovat</button>
+        <button class="translate-btn" id="translateBtn" onclick="doTranslate()">Přeložit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Examples -->
+  <div class="examples-section">
+    <div class="section-title">Zkus příklady</div>
+    <div class="examples-grid" id="exampleChips"></div>
+  </div>
+
+  <!-- Dictionary -->
+  <div class="dict-section">
+    <div class="section-title">Slovník slangu</div>
+    <div class="dict-grid" id="dictGrid"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">Zkopírováno! ✓</div>
+
+<script>
+const dictionary = {
+  // Obecné hodnocení
+  "bussin": "naprosto skvělý, výborný (zejm. jídlo)",
+  "no cap": "vážně, bez lží, opravdu",
+  "cap": "lež",
+  "fire": "úžasný, skvělý",
+  "slay": "být naprosto dokonalý, zvládnout to perfektně",
+  "rizz": "šarm, schopnost zaujmout (romanticky)",
+  "mid": "průměrný, podprůměrný, nic moc",
+  "goated": "nejlepší ze všech, legendární",
+  "based": "odvážně autentický, nezávisly na cizím názoru",
+  "cringe": "trapný, nepříjemný na sledování",
+  "sus": "podezřelý",
+  "lowkey": "trochu, tajně, nenápadně",
+  "highkey": "hodně, zjevně, veřejně",
+  "hit different": "působí jinak/lépe než obvykle",
+  "it's giving": "to vypadá jako..., to mi připomíná...",
+  "understood the assignment": "pochopil úkol, zvládl to perfektně",
+  "rent free": "neustále mi vytanuje na mysli",
+  "main character": "chovat se jako hlavní postava, středobod dění",
+  "npc": "nezajímavý člověk, bez osobnosti (jako herní postava)",
+  "fr fr": "vážně vážně, opravdu",
+  "fr": "vážně, opravdu",
+  "ong": "přísahám, vážně (on god)",
+  "bet": "dobře, jasně, souhlasím",
+  "slay queen": "jsi skvělá, zvládáš to",
+  "periodt": "tečka, konec řeči",
+  "period": "tečka, konec řeči",
+  "vibe": "atmosféra, nálada",
+  "vibe check": "ověření nálady/postoje",
+  "vibes": "dobré pocity, nálada",
+  "ate": "zvládl to naprosto perfektně",
+  "left no crumbs": "zvládl to do posledního detailu dokonale",
+  "ate and left no crumbs": "zvládl to naprosto perfektně",
+  "living rent free": "neustále mi vytanuje na mysli",
+  "sigma": "nezávislý, sebevědomý muž",
+  "alpha": "dominantní, vůdčí typ",
+  "delulu": "v iluzi, bláhový, nerealistický",
+  "touch grass": "jdi ven od počítače, vrať se do reality",
+  "ratio": "dostat více odpovědí než lajků (znak neúspěchu)",
+  "L": "prohra, selhání",
+  "W": "výhra, úspěch",
+  "take the L": "přiznat porážku",
+  "take the W": "přijmout výhru",
+  "snatched": "dokonale oblečený, perfektně vypadající",
+  "serve": "předvést dokonalý look nebo výkon",
+  "skibidi": "divně dobrý, cool způsobem podivné",
+  "rizzing up": "flirtování, snaha zaujmout",
+  "unalived": "zemřel/zabil (eufemismus)",
+  "understood": "jasně, rozumím",
+  "gyat": "výkřik obdivu (zejm. k postavě)",
+  "twin": "dvojník, nejlepší kamarád",
+  "fanum tax": "vzít si jídlo od kamaráda bez dovolení",
+  "mewing": "cvičení čelistních svalů pro lepší čelist",
+  "looksmaxxing": "maximalizace fyzické přitažlivosti",
+  "mogging": "být výrazně atraktivnější než ostatní",
+  "glazing": "nepřestávat někoho chválit, přehnaně obdivovat",
+  "cooked": "v průšvihu, zničený, hotový",
+  "no shot": "určitě ne, to není možné",
+  "deadass": "vážně, opravdu myslím",
+  "salty": "naštvaný, kyselý, uražený",
+  "clapped": "ošklivý",
+  "bruh": "kámo, člověče (výkřik překvapení)",
+  "bro": "kamaráde, člověče",
+  "sis": "kamarádko",
+  "fam": "rodina, kamarádi",
+  "slaps": "je to super, úžasné (zejm. hudba)",
+  "it slaps": "to je naprosto super",
+  "boomer": "starý, zastaralý člověk",
+  "ok boomer": "jo jo, starý",
+  "stan": "fanatický fanoušek, zbožňovat",
+  "simp": "ten, kdo se přehnaně podbízí",
+  "flex": "chlubení, předvádění",
+  "glow up": "výrazné zlepšení vzhledu nebo statusu",
+  "clout": "vliv, popularita",
+  "ghost": "přestat odpovídat, ignorovat",
+  "ghosted": "byl ignorován, přestal mu psát",
+  "canceled": "veřejně odsouzený, bojkotovaný",
+  "woke": "politicky uvědomělý",
+  "tea": "drby, klepy",
+  "spill the tea": "řekni mi drby",
+  "iconic": "legendární, nezapomenutelný",
+  "goat": "nejlepší ze všech",
+  "thirsty": "zoufale toužit po pozornosti",
+  "mood": "přesně tak to cítím, souzním s tím",
+  "big mood": "naprosto souzním",
+  "say less": "jasně, není třeba víc říkat",
+  "go off": "pokračuj, nedávej se zastavit",
+  "no worries": "žádný problém, nevadí",
+  "facts": "přesně tak, máš pravdu",
+  "hits different": "působí jinak/lépe než obvykle",
+  "understood the vibe": "pochopil jsem atmosféru",
+  "main character energy": "energie hlavní postavy",
+  "not me": "to já (ironicky)",
+  "lowkey obsessed": "trochu posedlý",
+  "highkey": "hodně, zjevně",
+
+  // Český slang
+  "čau": "ahoj",
+  "čus": "ahoj",
+  "nazdar": "ahoj",
+  "čauky": "ahoj",
+  "cajk": "dobře, v pořádku",
+  "fajn": "dobře, v pořádku",
+  "super": "skvělé",
+  "hustý": "skvělý, cool, úžasný",
+  "hustě": "skvěle, cool",
+  "děsný": "hrozně (hodně), ale i strašný",
+  "děsně": "hrozně moc",
+  "brutální": "úžasný, skvělý (pozitivně)",
+  "brutálně": "naprosto, extrémně",
+  "kravina": "nesmysl, hloupost",
+  "kraviny": "nesmysly, hlouposti",
+  "sranda": "legrace, zábava",
+  "srandovní": "legrační, vtipný",
+  "průser": "průšvih, problém",
+  "průšvih": "velký problém",
+  "pako": "hlupák, idiot",
+  "debil": "hlupák",
+  "blbec": "hlupák",
+  "blbost": "nesmysl",
+  "frajer": "cool člověk, šikovný člověk",
+  "frajírna": "něco skvělého",
+  "pohoda": "klid, v pohodě",
+  "v pohodě": "dobře, bez problémů",
+  "pohoda brácho": "všechno ok kamaráde",
+  "brácha": "kamarád, bratr",
+  "bro": "kamarád",
+  "kámoš": "kamarád",
+  "kámoška": "kamarádka",
+  "tyjo": "ty jo, výkřik překvapení",
+  "ty vole": "výkřik překvapení nebo zdůraznění",
+  "vole": "kámo, člověče (oslovení)",
+  "hele": "hej, poslouchej",
+  "fakt": "vážně, opravdu",
+  "fakt jo": "vážně? / ano vážně",
+  "vážně": "opravdu, je to pravda",
+  "jupí": "jupí, výkřik radosti",
+  "jéé": "ježíšmarjá, výkřik překvapení",
+  "ježíš": "výkřik překvapení",
+  "kokot": "hlupák, nadávka",
+  "zmrd": "nadávka",
+  "pičovina": "nesmysl, hloupost, špatná věc",
+  "hustej": "skvělý, cool",
+  "magor": "blázen, šílenec",
+  "magorský": "bláznivý, šílený",
+  "šílený": "bláznivý, ale i úžasný",
+  "šíleně": "naprosto, extrémně (i pozitivně)",
+  "bomba": "skvělé, výborné",
+  "bomba nápad": "skvělý nápad",
+  "echt": "opravdu, skutečně (z němčiny)",
+  "špek": "problém, nepříjemnost",
+  "ksicht": "obličej",
+  "kudla": "nůž",
+  "kšeft": "obchod, byznys",
+  "háček": "problém, komplikace",
+  "machr": "expert, profesionál, šikovný člověk",
+  "machrovský": "profesionální, šikovný",
+  "lama": "neschopný člověk",
+  "lamaňas": "neschopný člověk",
+  "kreténský": "hloupý",
+  "ztřeštěný": "bláznivý, neobvyklý",
+  "mega": "hodně, velmi, extrémně",
+  "ultra": "extrémně, hodně",
+  "neskutečný": "neuvěřitelný, úžasný",
+  "neskutečně": "neuvěřitelně",
+  "boží": "božský, skvělý, úžasný",
+  "božsky": "skvěle, úžasně",
+  "hustej nápad": "skvělý nápad",
+  "dát si pohov": "odpočinout si",
+  "pohov": "odpočinek, pauza",
+  "zmizet": "odejít, jít pryč",
+  "zmiz": "odejdi, vypadni",
+  "vypadni": "odejdi",
+  "dát si bacha": "dát si pozor",
+  "bacha": "pozor",
+  "šlohnout": "ukrást, vzít bez dovolení",
+  "šlohnul": "ukradl",
+  "makat": "tvrdě pracovat",
+  "makám": "tvrdě pracuji",
+  "dřít": "tvrdě pracovat",
+  "vyšplhat se": "dostat se nahoru, postoupit",
+  "sjetý": "unavený k smrti, nebo pod vlivem",
+  "rozjetý": "nadšený, plný energie",
+  "natěšený": "nadšený, těšící se",
+  "pařit": "hrát hry / bavit se na párty",
+  "pařba": "párty, zábava",
+  "párty": "večírek",
+  "dát si drink": "dát si alkohol",
+  "chlast": "alkohol",
+  "chlastat": "pít alkohol",
+  "ožralý": "opilý",
+  "fetovat": "brát drogy",
+  "ajtak": "správně, přesně tak",
+  "jasný": "jasně, rozumím",
+  "no jasně": "samozřejmě",
+  "jasně": "rozumím, samozřejmě",
+  "stará": "máma",
+  "starý": "táta nebo starý člověk",
+  "fotr": "táta",
+  "máma": "matka",
+  "babi": "babička",
+  "děda": "dědeček",
+  "zdrhnout": "utéct, rychle odejít",
+  "zdrhám": "utíkám pryč",
+  "chcípnout": "být extrémně unavený / zemřít (přeneseně)",
+  "chcípám": "jsem extrémně unavený",
+  "umřít od smíchu": "moc se smát",
+  "řvát smíchy": "hodně se smát",
+  "brečet smíchy": "hodně se smát",
+  "sjet někoho": "zkritizovat, seřvat",
+  "sjet": "zkritizovat nebo jet dolů",
+  "vytočit": "naštval, rozzlobil",
+  "vytočený": "naštvaný, rozzlobený",
+};
+
+// Build dictionary display
+const dictGrid = document.getElementById('dictGrid');
+Object.entries(dictionary).slice(0, 30).forEach(([slang, meaning]) => {
+  const item = document.createElement('div');
+  item.className = 'dict-item';
+  item.innerHTML = `<div class="dict-slang">${slang.toUpperCase()}</div><div class="dict-meaning">${meaning}</div>`;
+  dictGrid.appendChild(item);
+});
+
+// Mode: 'toNormal' or 'toSlang'
+let currentMode = 'toNormal';
+
+function setMode(mode) {
+  currentMode = mode;
+  const btnNormal = document.getElementById('btnToNormal');
+  const btnSlang = document.getElementById('btnToSlang');
+  const inputEl = document.getElementById('input');
+  const outputEl = document.getElementById('output');
+  const labelLeft = document.getElementById('labelLeft');
+  const labelRight = document.getElementById('labelRight');
+
+  if (mode === 'toNormal') {
+    btnNormal.classList.add('active');
+    btnSlang.classList.remove('active');
+    labelLeft.textContent = 'Alpha / český slang';
+    labelRight.textContent = 'Normální čeština';
+    inputEl.placeholder = 'Napiš text ve slangu... např. "ten outfit je bussin no cap fr fr"';
+  } else {
+    btnSlang.classList.add('active');
+    btnNormal.classList.remove('active');
+    labelLeft.textContent = 'Normální čeština';
+    labelRight.textContent = 'Alpha / český slang';
+    inputEl.placeholder = 'Napiš normální text... např. "ten outfit je opravdu skvělý"';
+  }
+
+  // Clear output
+  outputEl.innerHTML = '<span class="output-placeholder">Překlad se zobrazí zde...</span>';
+  inputEl.value = '';
+  updateCharCount();
+
+  // Update examples
+  renderExamples();
+}
+
+// Example phrases per mode
+const examplesSlangToNormal = [
+  "Ten outfit je bussin no cap fr fr",
+  "Bro úplně ate and left no crumbs",
+  "Lowkey sus ale highkey goated",
+  "Ong ten rizz je sigma",
+  "Slay queen, understood the assignment periodt",
+  "Mid vibes, touch grass bruh",
+  "Ty vole to je boží, fakt hustý",
+  "Ten frajer je mega machr no cap",
+  "Hele ta pařba byla neskutečná, šíleně srandovní",
+];
+
+const examplesNormalToSlang = [
+  "Ten outfit je opravdu skvělý",
+  "Kamarád to zvládl naprosto perfektně",
+  "Trochu podezřelý, ale hodně dobrý",
+  "Vážně, ten šarm je nejlepší ze všech",
+  "Jsi dokonalá, zvládla jsi to perfektně",
+  "Průměrná nálada, jdi ven od počítače",
+  "Dobře, výborný tah",
+  "Člověče, to je naprosto úžasné, fakt cool",
+];
+
+function renderExamples() {
+  const chipsContainer = document.getElementById('exampleChips');
+  chipsContainer.innerHTML = '';
+  const list = currentMode === 'toNormal' ? examplesSlangToNormal : examplesNormalToSlang;
+  list.forEach(ex => {
+    const chip = document.createElement('div');
+    chip.className = 'example-chip';
+    chip.textContent = ex;
+    chip.onclick = () => {
+      document.getElementById('input').value = ex;
+      updateCharCount();
+      doTranslate();
+    };
+    chipsContainer.appendChild(chip);
+  });
+}
+
+// Init examples
+renderExamples();
+
+// Char counter
+const inputEl = document.getElementById('input');
+inputEl.addEventListener('input', updateCharCount);
+function updateCharCount() {
+  document.getElementById('charCount').textContent = `${inputEl.value.length} / 1000 znaků`;
+}
+
+// Local slang→normal translate
+function localTranslate(text) {
+  const sorted = Object.entries(dictionary).sort((a, b) => b[0].length - a[0].length);
+  let result = text;
+  const replacements = [];
+  sorted.forEach(([slang, meaning]) => {
+    const regex = new RegExp(`\\b${slang.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+    result = result.replace(regex, () => `__TRANSLATED_${slang.toUpperCase().replace(/ /g,'_')}__`);
+    replacements.push([`__TRANSLATED_${slang.toUpperCase().replace(/ /g,'_')}__`, `[${meaning}]`]);
+  });
+  replacements.forEach(([ph, rep]) => { result = result.split(ph).join(rep); });
+  return result;
+}
+
+// Claude API translate
+async function doTranslate() {
+  const input = document.getElementById('input').value.trim();
+  if (!input) return;
+
+  const btn = document.getElementById('translateBtn');
+  const outputEl = document.getElementById('output');
+
+  btn.disabled = true;
+  btn.classList.add('loading');
+  btn.innerHTML = '<span class="spinner"></span>Překládám...';
+  outputEl.innerHTML = '<span class="output-placeholder">Překládám...</span>';
+
+  const isToSlang = currentMode === 'toSlang';
+
+  const systemPrompt = isToSlang
+    ? `Jsi překladač normální češtiny do slangu Generace Alpha a českého mládežnického slangu.
+Tvým úkolem je přeložit normální český text do autentického, cool slangu generace Alpha.
+Používej výrazy jako: bussin, no cap, fr fr, slay, rizz, goated, based, sus, lowkey, highkey, bet, periodt, ate, W, L, mid, sigma, delulu, vibe, fire, skibidi, bruh, ty vole, boží, hustý, mega, brutální apod.
+Zachovej smysl věty ale znič to slangem. Buď autentický a cool.
+Odpovídej POUZE přeloženým textem, bez komentáře.`
+    : `Jsi překladač slangu Generace Alpha a českého mládežnického slangu do normální češtiny.
+Přelož text ze slangu do srozumitelné, normální češtiny. Zachovej smysl.
+Odpovídej POUZE přeloženým textem, bez komentáře.`;
+
+  const userPrompt = isToSlang
+    ? `Přelož do slangu: "${input}"`
+    : `Přelož do normální češtiny: "${input}"`;
+
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [{ role: "user", content: userPrompt }]
+      })
+    });
+
+    const data = await response.json();
+    const translated = data.content?.[0]?.text || (isToSlang ? input : localTranslate(input));
+    outputEl.innerHTML = translated.replace(/\[([^\]]+)\]/g, '<span class="highlight">[$1]</span>');
+  } catch (err) {
+    const fallback = isToSlang ? input : localTranslate(input);
+    outputEl.innerHTML = fallback.replace(/\[([^\]]+)\]/g, '<span class="highlight">[$1]</span>');
+  }
+
+  btn.disabled = false;
+  btn.classList.remove('loading');
+  btn.innerHTML = 'Přeložit';
+}
+
+// Enter key
+inputEl.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    doTranslate();
+  }
+});
+
+function swapTexts() {
+  const outputEl = document.getElementById('output');
+  const currentOutput = outputEl.innerText;
+  if (!currentOutput || currentOutput.includes('Překlad se zobrazí') || currentOutput.includes('Překládám')) return;
+  // Also flip mode
+  const newMode = currentMode === 'toNormal' ? 'toSlang' : 'toNormal';
+  const textToMove = currentOutput.replace(/\[|\]/g, '');
+  setMode(newMode);
+  document.getElementById('input').value = textToMove;
+  updateCharCount();
+}
+
+function copyOutput() {
+  const text = document.getElementById('output').innerText;
+  if (!text || text.includes('Překlad se zobrazí')) return;
+  navigator.clipboard.writeText(text);
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+</script>
+</body>
+</html>
